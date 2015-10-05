@@ -22,7 +22,7 @@ class nnm_club(TorrentProvider, MovieProvider):
         'login' : baseurl + 'login.php',
         'login_check': baseurl + 'contact.php',
         'detail' : baseurl + 'viewtopic.php?t=%s',
-        'search' : baseurl + 'tracker.php?nm=%s&o=7',
+        'search' : baseurl + 'tracker.php?nm=%s&o=7&c=14',
         'download' : baseurl + 'download.php?id=%s',
     }
 
