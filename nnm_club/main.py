@@ -55,7 +55,7 @@ class nnm_club(TorrentProvider, MovieProvider):
                     dl_cell = all_cells[4].find('a')
                     size_cell = all_cells[5]
                     seed_cell = all_cells[7]
-					leech_cell = all_cells[8]
+                    leech_cell = all_cells[8]
                     
                     topic_id = title_cell['href']
                     topic_id = topic_id.replace('viewtopic.php?t=', '')
@@ -66,12 +66,18 @@ class nnm_club(TorrentProvider, MovieProvider):
                     size_txt_to_remove = size_cell.u.string
                     size = size_cell.getText("", strip=True).replace(size_txt_to_remove, '')
                     size = size.replace(',', '.')
+                    
+                    # Workaround for filtering 1080p and 720p by CouchPotato: BDRip is a source not a video quality!
+                    title = title_cell.getText().replace('BDRip', '')
+                    title = re.sub('^.*? / ', '', title)
+                    title = re.sub('[\[\]\(\)/ ]', '.', title)
+                    title = re.sub(':', '-', title)
+                    title = re.sub('\.\.+', '.', title)
 
-					# Workaround for filtering 1080p and 720p by CouchPotato: BDRip is a source not a video quality!
-                    torrent_name = title_cell.getText().replace('BDRip', '')
+                    torrent_name = title
                     torrent_size = self.parseSize( size )
                     torrent_seeders = tryInt(seed_cell.getText())
-					torrent_leechers = tryInt(leech_cell.getText())
+                    torrent_leechers = tryInt(leech_cell.getText())
                     torrent_detail_url = self.urls['detail'] % topic_id
                     torrent_url = self.urls['download'] % torrent_id
 
@@ -80,14 +86,14 @@ class nnm_club(TorrentProvider, MovieProvider):
                     log.debug('Forum %s?' % (torrent_detail_url))
                     log.debug('Dl %s?' % (torrent_url))
                     log.debug('seed %d?' % (torrent_seeders))
-					log.debug('leech %d?' % (torrent_leechers))
+                    log.debug('leech %d?' % (torrent_leechers))
                     
                     results.append({
                         'id': torrent_id,
                         'name': torrent_name,
                         'size': torrent_size,
                         'seeders': torrent_seeders,
-						'leechers': torrent_leechers,
+                        'leechers': torrent_leechers,
                         'url': torrent_url,
                         'detail_url': torrent_detail_url,
                     })
@@ -101,12 +107,11 @@ class nnm_club(TorrentProvider, MovieProvider):
         return {
             'username': self.conf('username'),
             'password': self.conf('password'),
-            'autologin': 'checked',
             'login': '%C2%F5%EE%E4',
         }
 
     def loginSuccess(self, output):
-        log.debug('Login output %s', output)        
+        #log.debug('Login output %s', output)        
         log.debug('Checking login success for nnm_club: %s' % ('True' if ('contact.php' in output.lower()) else 'False'))
         return 'contact.php' in output.lower()
 
