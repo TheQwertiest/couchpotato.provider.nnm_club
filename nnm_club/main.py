@@ -34,7 +34,7 @@ class nnm_club(TorrentProvider, MovieProvider):
         log.debug('Searching nnm_club for %s' % (title))
 
         url = self.urls['search'] % (title.replace(':', ' '))
-        data = self.getHTMLData(url)
+        data = self.getHTMLData(url).read().decode('cp1251')
 
         log.debug('Received data from nnm_club')
         if data:
@@ -47,15 +47,24 @@ class nnm_club(TorrentProvider, MovieProvider):
                     log.debug('No table results from nnm_club')
                     return
 
+                table_head = result_table.find('thead')
+                header_cells = table_head.find_all('th')
+
+                title_cell_idx = header_cells.index(table_head.find('th', title=u'Тема'))
+                dl_idx = header_cells.index(table_head.find('th', title=u'Скачать .torrent'))
+                size_idx = header_cells.index(table_head.find('th', title=u'Размер'))
+                seed_idx = header_cells.index(table_head.find('th', title='Seeders'))
+                leech_idx = header_cells.index(table_head.find('th', title='Leechers'))
+
                 torrents = result_table.find_all('tr', attrs = {'class' : re.compile("^prow")})
                 for result in torrents:
                     all_cells = result.find_all('td')
 
-                    title_cell = all_cells[2].find('a')
-                    dl_cell = all_cells[4].find('a')
-                    size_cell = all_cells[5]
-                    seed_cell = all_cells[7]
-					leech_cell = all_cells[8]
+                    title_cell = all_cells[title_cell_idx].find('a')
+                    dl_cell = all_cells[dl_idx].find('a')
+                    size_cell = all_cells[size_idx]
+                    seed_cell = all_cells[seed_idx]
+                    leech_cell = all_cells[leech_idx]
                     
                     topic_id = title_cell['href']
                     topic_id = topic_id.replace('viewtopic.php?t=', '')
@@ -67,11 +76,11 @@ class nnm_club(TorrentProvider, MovieProvider):
                     size = size_cell.getText("", strip=True).replace(size_txt_to_remove, '')
                     size = size.replace(',', '.')
 
-					# Workaround for filtering 1080p and 720p by CouchPotato: BDRip is a source not a video quality!
+                    # Workaround for filtering 1080p and 720p by CouchPotato: BDRip is a source not a video quality!
                     torrent_name = title_cell.getText().replace('BDRip', '')
                     torrent_size = self.parseSize( size )
                     torrent_seeders = tryInt(seed_cell.getText())
-					torrent_leechers = tryInt(leech_cell.getText())
+                    torrent_leechers = tryInt(leech_cell.getText())
                     torrent_detail_url = self.urls['detail'] % topic_id
                     torrent_url = self.urls['download'] % torrent_id
 
@@ -80,14 +89,14 @@ class nnm_club(TorrentProvider, MovieProvider):
                     log.debug('Forum %s?' % (torrent_detail_url))
                     log.debug('Dl %s?' % (torrent_url))
                     log.debug('seed %d?' % (torrent_seeders))
-					log.debug('leech %d?' % (torrent_leechers))
+                    log.debug('leech %d?' % (torrent_leechers))
                     
                     results.append({
                         'id': torrent_id,
                         'name': torrent_name,
                         'size': torrent_size,
                         'seeders': torrent_seeders,
-						'leechers': torrent_leechers,
+                        'leechers': torrent_leechers,
                         'url': torrent_url,
                         'detail_url': torrent_detail_url,
                     })
