@@ -77,7 +77,13 @@ class nnm_club(TorrentProvider, MovieProvider):
                     size = size.replace(',', '.')
 
                     # Workaround for filtering 1080p and 720p by CouchPotato: BDRip is a source not a video quality!
-                    torrent_name = title_cell.getText().replace('BDRip', '')
+                    title = title_cell.getText().replace('BDRip', '')
+                    title = re.sub('^.*? / ', '', title)
+                    title = re.sub('[\[\]\(\)/ ]', '.', title)
+                    title = re.sub(':', '-', title)
+                    title = re.sub('\.\.+', '.', title)
+
+                    torrent_name = title
                     torrent_size = self.parseSize( size )
                     torrent_seeders = tryInt(seed_cell.getText())
                     torrent_leechers = tryInt(leech_cell.getText())
@@ -110,12 +116,11 @@ class nnm_club(TorrentProvider, MovieProvider):
         return {
             'username': self.conf('username'),
             'password': self.conf('password'),
-            'autologin': 'checked',
             'login': '%C2%F5%EE%E4',
         }
 
     def loginSuccess(self, output):
-        log.debug('Login output %s', output)        
+        #log.debug('Login output %s', output)        
         log.debug('Checking login success for nnm_club: %s' % ('True' if ('contact.php' in output.lower()) else 'False'))
         return 'contact.php' in output.lower()
 
