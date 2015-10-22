@@ -1,4 +1,4 @@
-# -*- coding: cp1251 -*-
+# -*- coding: utf8 -*-
 import traceback
 
 from bs4 import BeautifulSoup
@@ -34,7 +34,7 @@ class nnm_club(TorrentProvider, MovieProvider):
         log.debug('Searching nnm_club for %s' % (title))
 
         url = self.urls['search'] % (title.replace(':', ' '))
-        data = self.getHTMLData(url).read().decode('cp1251')
+        data = self.getHTMLData(url).decode('cp1251')
 
         log.debug('Received data from nnm_club')
         if data:
