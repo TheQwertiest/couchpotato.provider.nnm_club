@@ -117,11 +117,11 @@ class nnm_club(TorrentProvider, MovieProvider):
             'username': self.conf('username'),
             'password': self.conf('password'),
             'login': '%C2%F5%EE%E4',
+            'autologin': 'on',
         }
 
     def loginSuccess(self, output):
-        #log.debug('Login output %s', output)        
-        log.debug('Checking login success for nnm_club: %s' % ('True' if ('contact.php' in output.lower()) else 'False'))
-        return 'contact.php' in output.lower()
+        log.debug('Checking login success for nnm_club: %s' % ('True' if ('login.php?logout=true' in output.lower()) else 'False'))
+        return 'login.php?logout=true' in output.lower()
 
     loginCheckSuccess = loginSuccess
