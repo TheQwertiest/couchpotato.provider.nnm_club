@@ -16,9 +16,9 @@ log = CPLog(__name__)
 
 class nnm_club(TorrentProvider, MovieProvider):
 
-    baseurl = 'https://nnm-club.me/forum/'
+    baseurl = 'https://nnmclub.to/forum/'
     urls = {
-        'test' : 'https://nnm-club.me',
+        'test' : 'https://nnmclub.to',
         'login' : baseurl + 'login.php',
         'login_check': baseurl + 'contact.php',
         'detail' : baseurl + 'viewtopic.php?t=%s',
@@ -59,18 +59,21 @@ class nnm_club(TorrentProvider, MovieProvider):
                 torrents = result_table.find_all('tr', attrs = {'class' : re.compile("^prow")})
                 for result in torrents:
                     all_cells = result.find_all('td')
+					
+                    copyright_cell = all_cells[title_cell_idx].find('img', title=u'Копирайт')
 
                     title_cell = all_cells[title_cell_idx].find('a')
-                    dl_cell = all_cells[dl_idx].find('a')
+                    if not copyright_cell:
+                        dl_cell = all_cells[dl_idx].find('a')
                     size_cell = all_cells[size_idx]
                     seed_cell = all_cells[seed_idx]
                     leech_cell = all_cells[leech_idx]
                     
                     topic_id = title_cell['href']
                     topic_id = topic_id.replace('viewtopic.php?t=', '')
-
-                    torrent_id = dl_cell['href']
-                    torrent_id = torrent_id.replace('download.php?id=', '')
+                    if not copyright_cell:
+                        torrent_id = dl_cell['href']
+                        torrent_id = torrent_id.replace('download.php?id=', '')
                     
                     size_txt_to_remove = size_cell.u.string
                     size = size_cell.getText("", strip=True).replace(size_txt_to_remove, '')
@@ -88,14 +91,20 @@ class nnm_club(TorrentProvider, MovieProvider):
                     torrent_seeders = tryInt(seed_cell.getText())
                     torrent_leechers = tryInt(leech_cell.getText())
                     torrent_detail_url = self.urls['detail'] % topic_id
-                    torrent_url = self.urls['download'] % torrent_id
+                    if not copyright_cell:
+                        torrent_url = self.urls['download'] % torrent_id
 
-                    log.debug('Title? %s' % (torrent_name))
-                    log.debug('Size %s?' % (torrent_size))   
-                    log.debug('Forum %s?' % (torrent_detail_url))
-                    log.debug('Dl %s?' % (torrent_url))
-                    log.debug('seed %d?' % (torrent_seeders))
-                    log.debug('leech %d?' % (torrent_leechers))
+                    log.debug('Title %s' % (torrent_name))
+                    log.debug('Size %s' % (torrent_size))   
+                    log.debug('Forum %s' % (torrent_detail_url))
+                    if not copyright_cell:
+                        log.debug('Dl %s' % (torrent_url))
+                    log.debug('seed %d' % (torrent_seeders))
+                    log.debug('leech %d' % (torrent_leechers))
+                    
+                    if copyright_cell:
+                        log.debug('This release is unavailable due copyright (use non-russian proxy to bypass)')
+                        continue
                     
                     results.append({
                         'id': torrent_id,
