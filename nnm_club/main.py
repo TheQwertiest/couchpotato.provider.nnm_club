@@ -34,12 +34,12 @@ class nnm_club(TorrentProvider, MovieProvider):
         if len(title) == 0:
             log.debug('Skipping. Reason: Title is empty')
             return
+            
+        log.debug('Searching nnm_club for %s' % (title))
 
         if len(title) <= 3:
             log.debug('Skipping. Reason: Title is too short for search')
             return
-
-        log.debug('Searching nnm_club for %s' % (title))
 
         url = self.urls['search'] % title.replace(':', ' ')
         data = self.getHTMLData(url).decode('cp1251')
@@ -142,6 +142,8 @@ class nnm_club(TorrentProvider, MovieProvider):
 
     loginCheckSuccess = loginSuccess
     
+    # Input format: Translated Title / Original Title (year) rest/of[the]name
+    # Output format: Original.Title.(year).[resolution].rest.of.the.name
     def formatTitle(self, raw_title):
         log.debug('Raw Title: %s' % raw_title)
 
@@ -158,23 +160,23 @@ class nnm_club(TorrentProvider, MovieProvider):
         year = m.group()
 
         title_split = title.split(year)
-        rest = title_split[1]
                   
         # Keep only last title name (nnm uses '/' to delimit title names in different languages)
         title_only = title_split[0].split('/')[-1].strip()
+        title_only = re.sub('[ \:]', '.', title_only)
+        
+        rest = re.sub('[^0-9a-zA-Z]+', '.', title_split[1])
 
-        # Resolution (1080p, etc)
-        p = re.compile('[0-9]{3,4}p')
+        # Resolution (1080p, 720p and etc)
+        p = re.compile('\.[0-9]{3,4}p(\.)?')
         m = p.search(rest)
         resolution = ''
         if m:
-            resolution = m.group()
+            resolution = m.group().replace('.','')
             rest = rest.replace(resolution, '')
             resolution = '[' + resolution + ']'
-          
-        title = title_only + '.' + year + '.' + resolution + '.'
-
-        title = re.sub('[ \:]', '.', title) + re.sub('[\[\]\(\)\/ \:]', '.', rest)
+            
+        title = title_only + '.' + year + '.' + resolution + '.' + rest
 
         title = re.sub('\.\.+', '.', title)
         title = re.sub('(^\.)|(\.$)', '', title)
