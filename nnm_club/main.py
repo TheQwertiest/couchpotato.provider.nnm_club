@@ -17,9 +17,9 @@ log = CPLog(__name__)
 
 class nnm_club(TorrentProvider, MovieProvider):
 
-    baseurl = 'https://nnmclub.to/forum/'
+    baseurl = 'https://nnm-club.name/forum/'
     urls = {
-        'test' : 'https://nnmclub.to',
+        'test' : 'https://nnm-club.name',
         'login' : baseurl + 'login.php',
         'login_check': baseurl + 'contact.php',
         'detail' : baseurl + 'viewtopic.php?t=%s',
@@ -69,7 +69,7 @@ class nnm_club(TorrentProvider, MovieProvider):
                 torrents = result_table.find_all('tr', attrs = {'class' : re.compile("^prow")})
                 for result in torrents:
                     all_cells = result.find_all('td')
-					
+
                     # Cells
                     copyright_cell = all_cells[title_cell_idx].find('img', title=u'Копирайт')
                     if not copyright_cell:
@@ -168,7 +168,7 @@ class nnm_club(TorrentProvider, MovieProvider):
         rest = re.sub('[^0-9a-zA-Z]+', '.', title_split[1])
 
         # Resolution (1080p, 720p and etc)
-        p = re.compile('\.[0-9]{3,4}p(\.)?')
+        p = re.compile('\.[0-9]{3,4}[pi](\.)?')
         m = p.search(rest)
         resolution = ''
         if m:
