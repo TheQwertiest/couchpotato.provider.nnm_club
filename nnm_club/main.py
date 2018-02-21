@@ -17,9 +17,9 @@ log = CPLog(__name__)
 
 class nnm_club(TorrentProvider, MovieProvider):
 
-    baseurl = 'https://nnm-club.name/forum/'
+    baseurl = 'https://nnm-club.me/forum/'
     urls = {
-        'test' : 'https://nnm-club.name',
+        'test' : 'https://nnm-club.me',
         'login' : baseurl + 'login.php',
         'login_check': baseurl + 'contact.php',
         'detail' : baseurl + 'viewtopic.php?t=%s',

@@ -12,6 +12,8 @@ See Settings->About->Directories (second folder is your config folder) for locat
 
 Once installed as above, go about activating the provider as you would with any other provider in CouchPotato.
 
+You might have to set proxy in CouchPotato settings, since NoNaMe Club is blocked in some countries.
+
 #Contribute/Issues
 
 Use issue tracker or send PR.
